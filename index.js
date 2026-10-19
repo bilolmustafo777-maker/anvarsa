@@ -153,10 +153,14 @@ bot.on('text', async (ctx, next) => {
     return ctx.reply(
       '📍 Endi JONLI lokatsiyani yuboring:\n' +
       '📎 → Joylashuv → "Jonli joylashuvni ulashish" (Share Live Location).\n' +
-      "Jonli lokatsiya ulanmaguncha ro'yxatdan o'tib bo'lmaydi.");
+      "Jonli lokatsiya ulanmaguncha ro'yxatdan o'tib bo'lmaydi.",
+      Markup.keyboard([[Markup.button.locationRequest('📍 Lokatsiyani yuborish')]]).resize());
   }
   if (u?.state === 'await_location') {
-    return ctx.reply("⚠️ Oddiy joylashuv qabul qilinmaydi. Iltimos, JONLI lokatsiyani yuboring.");
+    return ctx.reply(
+      "⚠️ Oddiy joylashuv qabul qilinmaydi. Tugma orqali yuborilgan lokatsiya jonli emas.\n" +
+      "📎 → Joylashuv → \"Jonli joylashuvni ulashish\" (Share Live Location) ni tanlang.",
+      Markup.keyboard([[Markup.button.locationRequest('📍 Lokatsiyani yuborish')]]).resize());
   }
   if (u?.state === 'await_phone') {
     return ctx.reply("Telefon raqamingizni tugma orqali yuboring: 📱 Raqamni yuborish.");
@@ -173,11 +177,14 @@ bot.on('location', async ctx => {
   // Haydovchi ro'yxatdan o'tishi: jonli lokatsiya MAJBURIY
   if (u?.state === 'await_location') {
     if (!loc.live_period) {
-      return ctx.reply('⚠️ Jonli lokatsiya kerak. 📎 → Joylashuv → "Jonli joylashuvni ulashish".');
+      return ctx.reply(
+        '⚠️ Jonli lokatsiya kerak. Tugma oddiy lokatsiya yuboradi, shuning uchun 📎 → Joylashuv → "Jonli joylashuvni ulashish" ni tanlang.',
+        Markup.keyboard([[Markup.button.locationRequest('📍 Lokatsiyani yuborish')]]).resize());
     }
     await patchUser(id, { state: 'active' });
     await saveDriverLoc(id, loc.latitude, loc.longitude);
-    return ctx.reply(`✅ Ro'yxatdan o'tdingiz, ${u.name}! Jonli lokatsiyangizni yoqilgan holda qoldiring.`);
+    return ctx.reply(`✅ Ro'yxatdan o'tdingiz, ${u.name}! Jonli lokatsiyangizni yoqilgan holda qoldiring.`,
+      Markup.removeKeyboard());
   }
 
   if (u?.role === 'driver' && u.state === 'active') {

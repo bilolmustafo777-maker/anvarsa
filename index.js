@@ -3,11 +3,14 @@ const { Telegraf, Markup } = require('telegraf');
 const { Pool } = require('pg');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+if (!process.env.DATABASE_URL || !/^postgres(ql)?:\/\//.test(process.env.DATABASE_URL)) {
+  console.error("DATABASE_URL noto'g'ri yoki yo'q. Qiymat postgresql:// bilan boshlanishi kerak. " +
+    "Railway'da: ${{Postgres.DATABASE_URL}} (Postgres servis nomini tekshiring).");
+  process.exit(1);
+}
 const db = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('localhost')
-    ? { rejectUnauthorized: false }
-    : false,
+  ssl: process.env.PGSSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 const ADMIN_IDS = (process.env.ADMIN_IDS || '')
   .split(',').map(s => Number(s.trim())).filter(Boolean);
